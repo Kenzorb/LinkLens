@@ -1,0 +1,23 @@
+.ll-read-time {
+  display: inline-block !important;
+  margin-left: 10px !important;
+  padding: 3px 8px !important;
+
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+
+  color: #0f766e !important;
+  background: #ccfbf1 !important;
+
+  border: 1px solid #99f6e4 !important;
+  border-radius: 999px !important;
+
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+
+  text-decoration: none !important;
+}
