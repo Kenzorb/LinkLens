@@ -3,10 +3,19 @@
   "name": "LinkLens – Read Time for Links",
   "version": "1.0.0",
   "description": "Shows estimated read time next to links so you know what is worth clicking before opening.",
-  "permissions": ["scripting"],
+  "permissions": ["storage", "tabs"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "background": {
     "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+        "16": "assets/LinkLens_16.png",
+        "32": "assets/LinkLens_32.png",
+        "48": "assets/LinkLens_48.png",
+        "128": "assets/LinkLens_128.png"
+    }
   },
   "content_scripts": [
     {

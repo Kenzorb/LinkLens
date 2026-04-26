@@ -29,21 +29,6 @@ function getResultLinks() {
   });
 }
 
-function extractReadableTextFromHtml(html) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-
-  doc.querySelectorAll(
-    "script, style, nav, footer, header, aside, form, button, noscript, svg"
-  ).forEach((el) => el.remove());
-
-  const article =
-    doc.querySelector("article") ||
-    doc.querySelector("main") ||
-    doc.body;
-
-  return article.innerText || "";
-}
-
 function getReadTimeFromBackground(url) {
   return new Promise((resolve) => {
     chrome.runtime.sendMessage(
@@ -103,4 +88,18 @@ const observer = new MutationObserver(() => {
 observer.observe(document.body, {
   childList: true,
   subtree: true
+});
+
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.type === "WPM_UPDATED") {
+    document.querySelectorAll(".ll-read-time").forEach((badge) => {
+      badge.remove();
+    });
+
+    document.querySelectorAll("[data-read-time-added]").forEach((link) => {
+      delete link.dataset.readTimeAdded;
+    });
+
+    addReadTimeToLinks();
+  }
 });

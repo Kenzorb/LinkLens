@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 280px;
+      padding: 18px;
+      font-family: Arial, sans-serif;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #7c3aed;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 10px;
+      color: #0f766e;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Read Time</h2>
+  <label class="toggle-row">
+    <input id="useDefault" type="checkbox" />
+    Use recommended speed: 220 WPM
+  </label>
+
+  <label>Your Reading Speed (WPM)</label>
+  <input id="wpm" type="number" min="30" max="1000" />
+
+  <button id="save">Save</button>
+
+  <div id="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -21,3 +21,17 @@
 
   text-decoration: none !important;
 }
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.toggle-row input {
+  width: auto;
+  margin: 0;
+}
