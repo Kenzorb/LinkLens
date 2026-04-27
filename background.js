@@ -64,10 +64,102 @@ function extractReadableText(html) {
     .trim();
 }
 
+function isRedditUrl(url) {
+  try {
+    return new URL(url).hostname.includes("reddit.com");
+  } catch {
+    return false;
+  }
+}
+
+function toRedditJsonUrl(url) {
+  const cleanUrl = url.split("?")[0].split("#")[0];
+  return cleanUrl.endsWith("/")
+    ? `${cleanUrl}.json`
+    : `${cleanUrl}.json`;
+}
+
+function extractRedditText(data) {
+  const parts = [];
+
+  const textFields = [
+    "title",
+    "selftext",
+    "body",
+    "body_html",
+    "selftext_html"
+  ];
+
+  function cleanText(value) {
+    if (!value || typeof value !== "string") return "";
+
+    return value
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function walk(node) {
+    if (!node) return;
+
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
+
+    if (typeof node === "object") {
+      for (const field of textFields) {
+        const value = cleanText(node[field]);
+
+        if (value) {
+          parts.push(value);
+        }
+      }
+
+      Object.values(node).forEach(walk);
+    }
+  }
+
+  walk(data);
+
+  return [...new Set(parts)].join(" ");
+}
+
 async function getReadTime(url) {
   const cleanUrl = url.split("#")[0];
+  console.log("URL:", cleanUrl);
 
   let words;
+
+  if (isRedditUrl(cleanUrl)) {
+    const redditJsonUrl = toRedditJsonUrl(cleanUrl);
+
+    const res = await fetch(redditJsonUrl, {
+      method: "GET",
+      credentials: "omit"
+    });
+
+    if (!res.ok) throw new Error(`response Status: ${res.status}`);
+
+    const data = await res.json();
+    console.log("==============data: ", data)
+    const text = extractRedditText(data);
+    console.log("==============text: ", text)
+    const words = countWords(text);
+    console.log("==============number of words: ", words)
+
+    console.log("Reddit JSON words:", words);
+
+    if (words < 5) return null;
+
+    const wordsPerMinute = await getUserWordsPerMinute();
+    return Math.max(1, Math.ceil(words / wordsPerMinute));
+  }
 
   if (wordCountCache.has(cleanUrl)) {
     words = wordCountCache.get(cleanUrl);
