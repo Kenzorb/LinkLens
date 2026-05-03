@@ -35,3 +35,12 @@
   width: auto;
   margin: 0;
 }
+
+#readTimeMode {
+  width: 100%;
+  padding: 10px;
+  font-size: 15px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
