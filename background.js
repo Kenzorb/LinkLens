@@ -1,17 +1,35 @@
 const DEFAULT_WORDS_PER_MINUTE = 220;
 const wordCountCache = new Map();
 
-async function getUserWordsPerMinute() {
-  const result = await chrome.storage.sync.get([
-    "wordsPerMinute",
-    "useDefaultWpm"
-  ]);
-
-  if (result.useDefaultWpm ?? true) {
-    return DEFAULT_WORDS_PER_MINUTE;
+function formatReadTime(minutes, mode) {
+  if (mode === "exact") {
+    return `${minutes} min read`;
   }
 
-  return result.wordsPerMinute || DEFAULT_WORDS_PER_MINUTE;
+  if (minutes <= 1) return "1 min read";
+
+  const lower = Math.max(1, minutes - 1);
+  const upper = minutes + 1;
+
+  return `${lower}-${upper} min read`;
+}
+
+async function getUserSettings() {
+  const result = await chrome.storage.sync.get([
+    "wordsPerMinute",
+    "useDefaultWpm",
+    "readTimeMode"
+  ]);
+
+  const wordsPerMinute =
+    result.useDefaultWpm ?? true
+      ? DEFAULT_WORDS_PER_MINUTE
+      : result.wordsPerMinute || DEFAULT_WORDS_PER_MINUTE;
+
+  return {
+    wordsPerMinute,
+    readTimeMode: result.readTimeMode || "exact"
+  };
 }
 
 function countWords(text) {
@@ -92,19 +110,26 @@ async function getReadTime(url) {
     wordCountCache.set(cleanUrl, words);
   }
 
-  const wordsPerMinute = await getUserWordsPerMinute();
-  const minutes = Math.max(1, Math.ceil(words / wordsPerMinute));
-  console.log("==============minutes ", minutes)
+  const { wordsPerMinute, readTimeMode } = await getUserSettings();
 
-  return minutes;
+  const minutes = Math.max(1, Math.ceil(words / wordsPerMinute));
+  const displayText = formatReadTime(minutes, readTimeMode);
+
+  console.log("==============minutes ", minutes);
+  console.log("==============displayText ", displayText);
+
+  return {
+    minutes,
+    displayText
+  };
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type !== "GET_READ_TIME") return;
 
   getReadTime(message.url)
-    .then((minutes) => {
-      sendResponse({ ok: true, minutes });
+    .then((result) => {
+      sendResponse({ ok: true, ...result });
     })
     .catch((error) => {
       console.warn("Read time failed:", message.url, error);

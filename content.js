@@ -42,7 +42,7 @@ function getReadTimeFromBackground(url) {
           return;
         }
 
-        resolve(response.minutes);
+        resolve(response.displayText);
       }
     );
   });
@@ -58,25 +58,23 @@ function createBadge(text) {
 async function addReadTimeToLinks() {
   const links = getResultLinks();
 
-  for (const link of links) {
-    if (shouldSkipLink(link)) continue;
+  await Promise.all(
+    links.map(async (link) => {
+      if (shouldSkipLink(link)) return;
 
-    const title = link.querySelector("h3");
-    if (!title) continue;
+      const title = link.querySelector("h3");
+      if (!title) return;
 
-    link.dataset.readTimeAdded = "true";
+      link.dataset.readTimeAdded = "true";
 
-    const badge = createBadge(" calculating...");
-    title.appendChild(badge);
+      const badge = createBadge("Calculating...");
+      title.appendChild(badge);
 
-    const readTime = await getReadTimeFromBackground(link.href);
+      const readTimeText = await getReadTimeFromBackground(link.href);
 
-    if (readTime) {
-      badge.textContent = `${readTime} min read`;
-    } else {
-      badge.textContent = "read time unavailable";
-    }
-  }
+      badge.textContent = readTimeText || "Read Time Unavailable";
+    })
+  );
 }
 
 addReadTimeToLinks();
@@ -91,7 +89,7 @@ observer.observe(document.body, {
 });
 
 chrome.runtime.onMessage.addListener((message) => {
-  if (message.type === "WPM_UPDATED") {
+  if (message.type === "SETTINGS_UPDATED") {
     document.querySelectorAll(".ll-read-time").forEach((badge) => {
       badge.remove();
     });
