@@ -70,7 +70,16 @@ async function addReadTimeToLinks() {
       const badge = createBadge("Calculating...");
       title.appendChild(badge);
 
+      if (cache.has(link.href)) {
+        badge.textContent = cache.get(link.href);
+        return;
+      }
+
       const readTimeText = await getReadTimeFromBackground(link.href);
+
+      if (readTimeText) {
+        cache.set(link.href, readTimeText);
+      }
 
       badge.textContent = readTimeText || "Read Time Unavailable";
     })
